@@ -1,0 +1,7 @@
+filename="Traffic_Sign_Detection"
+imagename1="../Samples/señales.jpg"
+imagename2="../Samples/flechas.jpg"
+imagename3="../Samples/obras.jpg"
+imagename4=""
+imagename5=""
+
