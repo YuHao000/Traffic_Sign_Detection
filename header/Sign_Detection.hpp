@@ -19,6 +19,22 @@
 
 #include "Sign_Detection_header.hpp"
 
+class Data_pic
+{
+public:
+  int index;
+  std::string picName;
+  cv::Mat Pic_color;
+  cv::Mat Pic_color_high_contrast;
+  cv::Mat Pic_grey;
+  cv::Mat Pic_HSV;
+  cv::Mat Pic_HSV_red;
+  cv::Mat Pic_HSV_blue;
+  cv::Mat Pic_th;
+  cv::Mat Pic_final;
+  std::vector<std::vector<cv::Point> >  v_contours;
+};
+
 class Sign_Detection
 {
 public:
@@ -27,29 +43,20 @@ public:
   Sign_Detection(const int& argc, char* argv[]);
   ~Sign_Detection();
 
-// private:
+  std::vector<Data_pic> get_v_data() const { return v_data; }
+  bool get_loadStatus()             const { return loadStatus; }
+  void HSV_treatment();
+  void extract_red_HSV(Data_pic& data);
+  void extract_blue_HSV(Data_pic& data);
+private:
+  std::vector<Data_pic> v_data;
+  bool loadStatus;
   std::string samples_path;
-  std::vector<cv::Mat> v_Pic;
-  std::vector<cv::Mat> v_Pic_color;
-  std::vector<cv::Mat> v_Pic_grey;
-  std::vector<cv::Mat> v_Pic_HSV;
-  std::vector<cv::Mat> v_Pic_HSV_red;
-  std::vector<cv::Mat> v_Pic_HSV_blue;
-  std::vector<cv::Mat> v_Pic_th;
-  std::vector<cv::Mat> v_Pic_original;
-  std::vector<cv::Mat> v_Pic_final;
-  std::vector<std::string>  v_picName;
-  std::vector <std::vector<std::vector<cv::Point> > > v_contours;
-
   cv_lib::UserData user_data;
 
-  bool get_loadStatus()   const { return loadStatus; }
 
-  void HSV_treatment();
 
-  private:
-    bool loadStatus;
-};
+  };
 
 
 #endif // Sign_Detection_HPP_INCLUDED

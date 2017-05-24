@@ -18,10 +18,6 @@
 #include <string>
 #include <cassert>
 
-#define Pic_color instance.v_Pic_color[num_pic]
-#define Pic_grey  instance.v_Pic_grey[num_pic]
-#define Pic_th  instance.v_Pic_th[num_pic]
-
 using namespace cv;
 using namespace cv_lib;
 
@@ -35,26 +31,28 @@ int main(int argc, char* argv[])
   if(instance.get_loadStatus() < 0)
     return EXIT_FAILURE;
 
-  // show_pic(instance.v_Pic_color, instance.v_picName);
-
-  instance.HSV_treatment();
-  for(auto&x:instance.v_Pic_color)
-    medianBlur(x, x, 7);
-
-  waitKey();
-
-  instance.HSV_treatment();
-  waitKey();
-
-
-  th_pic(instance.v_Pic_grey, instance.v_Pic_th);
-  show_pic(instance.v_Pic_th, "OTSU thresholding");
-  for(int num_pic=0; num_pic < instance.v_Pic_th.size(); ++num_pic)   // Th treatment
+  for(auto& data:instance.get_v_data())
   {
+    data.Pic_color.convertTo(data.Pic_color_high_contrast, -1, 2, 0);     // 2x contrast
+    HSV_pic(data.Pic_color_high_contrast, data.Pic_HSV);                  // Re-write
 
-  }
+    instance.extract_red_HSV(data);
+    instance.extract_blue_HSV(data);
 
+    show_pic(data.Pic_color);
+    show_pic(data.Pic_color_high_contrast, "contrast");
+
+    waitKey();
+
+    Mat blurr;
+    medianBlur(data.Pic_color, blurr, 7);
+    show_pic(blurr, data.picName);
 
   waitKey();
+}
+
+  instance.HSV_treatment();
+  waitKey();
+
   return EXIT_SUCCESS;
 }
