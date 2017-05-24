@@ -23,27 +23,29 @@ class Sign_Detection
 {
 public:
   Sign_Detection();
+  Sign_Detection(const std::string relative_path);
   Sign_Detection(const int& argc, char* argv[]);
   ~Sign_Detection();
 
-  // private:
-    std::vector<cv::Mat> v_Pic;
-    std::vector<cv::Mat> v_Pic_color;
-    std::vector<cv::Mat> v_Pic_grey;
-    std::vector<cv::Mat> v_Pic_HSV;
-    std::vector<cv::Mat> v_Pic_HSV_red;
-    std::vector<cv::Mat> v_Pic_HSV_blue;
-    std::vector<cv::Mat> v_Pic_th;
-    std::vector<cv::Mat> v_Pic_original;
-    std::vector<cv::Mat> v_Pic_final;
-    std::vector<std::string>  v_picName;
-    std::vector <std::vector<std::vector<cv::Point> > > v_contours;
+// private:
+  std::string samples_path;
+  std::vector<cv::Mat> v_Pic;
+  std::vector<cv::Mat> v_Pic_color;
+  std::vector<cv::Mat> v_Pic_grey;
+  std::vector<cv::Mat> v_Pic_HSV;
+  std::vector<cv::Mat> v_Pic_HSV_red;
+  std::vector<cv::Mat> v_Pic_HSV_blue;
+  std::vector<cv::Mat> v_Pic_th;
+  std::vector<cv::Mat> v_Pic_original;
+  std::vector<cv::Mat> v_Pic_final;
+  std::vector<std::string>  v_picName;
+  std::vector <std::vector<std::vector<cv::Point> > > v_contours;
 
-    cv_lib::UserData user_data;
+  cv_lib::UserData user_data;
 
-    bool get_loadStatus()   const { return loadStatus; }
+  bool get_loadStatus()   const { return loadStatus; }
 
-    void HSV_treatment();
+  void HSV_treatment();
 
   private:
     bool loadStatus;

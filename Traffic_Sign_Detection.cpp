@@ -25,14 +25,17 @@
 using namespace cv;
 using namespace cv_lib;
 
+const std::string relative_path("../samples");
+
 int main(int argc, char* argv[])
 {
-  Sign_Detection instance(argc, argv);
+  // Sign_Detection instance(argc, argv);
+  Sign_Detection instance(relative_path);
 
   if(instance.get_loadStatus() < 0)
     return EXIT_FAILURE;
 
-  show_pic(instance.v_Pic_color, instance.v_picName);
+  // show_pic(instance.v_Pic_color, instance.v_picName);
 
   instance.HSV_treatment();
   for(auto&x:instance.v_Pic_color)
