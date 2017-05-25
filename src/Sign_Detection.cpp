@@ -64,7 +64,7 @@ Sign_Detection::~Sign_Detection()
 
 }
 
-void Sign_Detection::extract_red_HSV(Data_pic& data)
+void Sign_Detection::extract_red_HSV(Data_pic& data)  // TO:CHECK:
 {
   Mat red_hue;
 
@@ -74,14 +74,10 @@ void Sign_Detection::extract_red_HSV(Data_pic& data)
   cv::inRange(data.Pic_HSV, RED_HSV_LOWER_LOW, RED_HSV_LOWER_HIGH, red_hue_lower);
 
   red_hue=(red_hue_lower | red_hue_upper);
-
-  show_pic(red_hue, "HSV red");
-
   th_pic(red_hue, red_hue, 125, CV_THRESH_BINARY | CV_THRESH_OTSU);
-
-  show_pic(red_hue, "HSV red th");
-
   data.Pic_HSV_red= red_hue;
+
+  // show_pic(red_hue, "HSV red th");
 }
 
 void Sign_Detection::extract_blue_HSV(Data_pic& data)
@@ -89,54 +85,100 @@ void Sign_Detection::extract_blue_HSV(Data_pic& data)
   Mat blue_hue;
 
   cv::inRange(data.Pic_HSV, BLUE_HSV_LOW, BLUE_HSV_HIGH, blue_hue);
-  show_pic(blue_hue, "HSV blue");
   th_pic(blue_hue, blue_hue, 125, CV_THRESH_BINARY | CV_THRESH_OTSU);
-  show_pic(blue_hue, "HSV blue th");
-
   data.Pic_HSV_blue= blue_hue;
 
+  // show_pic(blue_hue, "HSV blue th");
 }
 
-void Sign_Detection::HSV_treatment()
+void Sign_Detection::filter_red_contours(Data_pic& data)gg
 {
-  Mat a;
-  // extract_red_HSV(a);
-  // extract_blue_HSV(a);
+  Mat Pic= data.Pic_color.clone();
 
-  unsigned cont=0;
-  // for(auto& x:v_data)
-  // {
-  //   show_pic(x.Pic_color, "Original");
-  //   ++cont;
-  //   Mat red_hue, blue_hue;
-  //
-  //   Mat red_hue_upper;
-  //   cv::inRange(x.Pic_HSV, RED_HSV_UPPER_LOW, RED_HSV_UPPER_HIGH, red_hue_upper);
-  //   Mat red_hue_lower;
-  //   cv::inRange(x.Pic_HSV, RED_HSV_LOWER_LOW, RED_HSV_LOWER_HIGH, red_hue_lower);
-  //
-  //   red_hue=(red_hue_lower | red_hue_upper);
-  //
-  //   cv::inRange(x.Pic_HSV, BLUE_HSV_LOW, BLUE_HSV_HIGH, blue_hue);
-  //
-  //
-  //   show_pic(red_hue, "HSV red");
-  //   show_pic(blue_hue, "HSV blue");
-  //
-  //   th_pic(red_hue, red_hue, 125, CV_THRESH_BINARY | CV_THRESH_OTSU);
-  //   th_pic(blue_hue, blue_hue, 125, CV_THRESH_BINARY | CV_THRESH_OTSU);
-  //
-  //   x.Pic_HSV_blue= blue_hue;
-  //   x.Pic_HSV_red= red_hue;
-  //
-  //   show_pic(red_hue, "HSV red th");
-  //   show_pic(blue_hue, "HSV blue th");
-  //
-  //   // Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
-  //   // Point anchor1 = Point(-1,-1);
-  //   // erode(red_hue, red_hue, kernel1, anchor1, 1);       // TO-DO
-  //   // dilate(red_hue, red_hue, kernel1, anchor1, 2);
-  //
-  //   waitKey();
-  // }
+  std::vector<Mat> v_Pic_roi;
+  std::vector<RotatedRect>  v_rotated_rect;
+  std::vector<RotatedRect>  v_ellipse;
+  v_rotated_rect.reserve(data.v_red_contours.size());
+  v_ellipse.reserve(data.v_red_contours.size());
+  v_Pic_roi.reserve(data.v_red_contours.size());
+
+  double min_area= 0.1 * sqrt(static_cast<double>(data.Pic_HSV_red.rows) * static_cast<double>(data.Pic_HSV_red.cols));
+  // std::cout<<min_area<<std::endl;    // TO-CHECK
+  const double coef_x= 0.5, coef_y= 0.5;
+  const double percentaje_true_contours= 0.65;
+  const double min_circularity= 0.75;
+  const double acceptable_circularity= 0.50;
+
+  for(int index=0; index<data.v_red_contours.size(); ++index)
+  {
+    auto contour= data.v_red_contours[index];
+    auto rotated_rect= minAreaRect(contour);
+
+    double area= contourArea(contour, false);
+    double perimeter= arcLength(contour, true);
+    double circularity= 4*PI*area/(perimeter*perimeter);
+
+    if(area > min_area && rotated_rect.size.height > coef_y*min_area && rotated_rect.size.width > coef_x*min_area)
+    {
+        std::cout<<"Circularity: "  << circularity << std::endl;
+
+      std::vector<cv::Point> poly;
+      cv::approxPolyDP(Mat(contour), poly, arcLength(Mat(contour), true) * 0.01, true);
+
+      cv::approxPolyDP(contour, poly, 0.02*perimeter, true);
+
+      std::cout<<"Lados: "<<poly.size()<<std::endl;
+
+      // switch(poly.size());
+
+      if(circularity>min_circularity || poly.size()==3 || poly.size()==8)
+      {
+        if(circularity>min_circularity)
+        {
+          Sign found;
+          found.color= Color::red;
+          found.shape= Shape::circular;
+
+          if(poly.size()==8)        // TO-CHECK: demasiado común
+            found.name= Name::stop;
+
+          data.v_signs.push_back(found);
+        }
+        else if(circularity>acceptable_circularity && poly.size()==3)
+        {
+          Sign found;
+          found.color= Color::red;
+          found.shape= Shape::triangular;
+
+          data.v_signs.push_back(found);
+        }
+
+
+        for(int i=0; i<poly.size(); ++i)            // DEBUG
+        {
+          line(Pic, poly[i], poly[i+1], GREEN, 1);
+          if(i==poly.size()-1)
+          line(Pic, poly[i], poly[0], GREEN, 1);
+        }
+        // show_pic(Pic, "poly");
+
+        v_ellipse.push_back(fitEllipse(contour));
+        v_rotated_rect.push_back(rotated_rect);
+
+        drawContours(Pic, data.v_red_contours, index, GREEN, 1);        // Debug
+        ellipse(Pic, v_ellipse.back(), YELLOW, 1);                    // Debug
+        Point2f rect_points[4]; rotated_rect.points(rect_points);     // Debug
+        draw_rectangle(Pic, rect_points, BLUE);                       // Debug
+
+        show_pic(Pic, "contours");
+        waitKey();
+      }
+    }
+  }
+  // destroyAllWindows();
+}
+
+void Sign_Detection::filter_blue_contours(Data_pic& data)
+{
+
 }

@@ -13,8 +13,8 @@ const int MAX_HUE         (180);
 const int MAX_VALUE       (255);  // Range Max.
 const int MAX_SATURATION  (255);
 
-const int MIN_VALUE       (100);  // Not range Min, but filter parameter
-const int MIN_SATURATION  (100);
+const int MIN_VALUE       (150);  // Not range Min, but filter parameter
+const int MIN_SATURATION  (150);
 
 
 const int RED_RNG   (15);

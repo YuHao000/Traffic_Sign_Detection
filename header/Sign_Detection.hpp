@@ -19,6 +19,26 @@
 
 #include "Sign_Detection_header.hpp"
 
+enum class Shape {unknown_shape, triangular, circular, rectangular};
+
+enum class Color {unknown_color, red, blue};
+
+enum class Name {unknown_name, stop, prohibido, no_circulacion, circulacion_obligatoria, ceda, peaton, aparcamiento, paso_zebra, minusvalidos, taxi};
+
+class Sign
+{
+public:
+  Sign()
+    :shape(Shape::unknown_shape), color(Color::unknown_color), name(Name::unknown_name)
+   {
+
+   }
+
+  Shape shape;
+  Color color;
+  Name name;
+};
+
 class Data_pic
 {
 public:
@@ -31,8 +51,13 @@ public:
   cv::Mat Pic_HSV_red;
   cv::Mat Pic_HSV_blue;
   cv::Mat Pic_th;
+  cv::Mat Pic_roi;
   cv::Mat Pic_final;
   std::vector<std::vector<cv::Point> >  v_contours;
+  std::vector<std::vector<cv::Point> >  v_red_contours;
+  std::vector<std::vector<cv::Point> >  v_blue_contours;
+
+  std::vector<Sign> v_signs;
 };
 
 class Sign_Detection
@@ -45,16 +70,15 @@ public:
 
   std::vector<Data_pic> get_v_data() const { return v_data; }
   bool get_loadStatus()             const { return loadStatus; }
-  void HSV_treatment();
   void extract_red_HSV(Data_pic& data);
   void extract_blue_HSV(Data_pic& data);
+  void filter_red_contours(Data_pic& data);
+  void filter_blue_contours(Data_pic& data);
 private:
   std::vector<Data_pic> v_data;
   bool loadStatus;
   std::string samples_path;
   cv_lib::UserData user_data;
-
-
 
   };
 
