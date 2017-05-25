@@ -57,14 +57,15 @@ int main(int argc, char* argv[])
         unsigned index=0;
         for(const auto& circular_template:instance.v_templates)
         {
-          std::cout<<"Template #"<<index+1<<"/"<<instance.v_templates.size()<<std::endl;
+          // std::cout<<"Template # "<<index+1<<"/"<<instance.v_templates.size()<<std::endl;
           Mat result;
           if(cv_lib::template_matching(data.Pic_HSV_red, possible_sign.roi, circular_template)==true)
           {
             int pos= instance.v_picNames[index].find("_template");
             std::string name(instance.v_picNames[index], 0, pos);
             possible_sign.name= name;
-            std::cout<<"This is a "<<name<<std::endl<<std::endl<<std::endl;
+            // std::cout<<"This is a "<<name<<std::endl<<std::endl<<std::endl;
+            instance.print_info(possible_sign);
             break;
           }
           else
@@ -72,14 +73,14 @@ int main(int argc, char* argv[])
             int pos= instance.v_picNames[index].find("_template");
             std::string name(instance.v_picNames[index], 0, pos);
             possible_sign.name= name;
-            std::cout<<"This is NOT a "<<name<<std::endl;
+            // std::cout<<"This is NOT a "<<name<<std::endl;
           }
 
           ++index;
-          waitKey();
+          // waitKey();
         }
       }
-
+      waitKey();
       destroyAllWindows();
 
     }
@@ -90,10 +91,12 @@ int main(int argc, char* argv[])
     // morpho_pic(data.Pic_HSV_red, data.Pic_HSV_red, 3, MORPH_OPEN);
     //  show_pic(data.Pic_HSV_red, "closed");
 
-    continue;
     create_contours(data.Pic_HSV_blue, data.v_blue_contours);
     instance.extract_blue_HSV(data);
     instance.filter_blue_contours(data);
+    show_pic(data.Pic_HSV_blue, "Blue");
+    waitKey();
+    continue;
 
     Mat result;
 

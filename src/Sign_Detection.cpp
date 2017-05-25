@@ -105,21 +105,20 @@ void Sign_Detection::extract_blue_HSV(Data_pic& data) {
   // show_pic(blue_hue, "HSV blue th");
 }
 
-void Sign_Detection::filter_red_contours(Data_pic& data)
-{
+void Sign_Detection::filter_red_contours(Data_pic& data)  {
   Mat Pic= data.Pic_color.clone();
 
-  std::vector<Mat> v_Pic_roi;
-  std::vector<RotatedRect>  v_rotated_rect;
-  std::vector<RotatedRect>  v_ellipse;
-  v_rotated_rect.reserve(data.v_red_contours.size());
-  v_ellipse.reserve(data.v_red_contours.size());
-  v_Pic_roi.reserve(data.v_red_contours.size());
+  // std::vector<Mat> v_Pic_roi;
+  // std::vector<RotatedRect>  v_rotated_rect;
+  // std::vector<RotatedRect>  v_ellipse;
+  // v_rotated_rect.reserve(data.v_red_contours.size());
+  // v_ellipse.reserve(data.v_red_contours.size());
+  // v_Pic_roi.reserve(data.v_red_contours.size());
   double min_area= 0.1 * sqrt(static_cast<double>(data.Pic_HSV_red.rows) * static_cast<double>(data.Pic_HSV_red.cols));
-  // std::cout<<min_area<<std::endl;    // TO-CHECK
   const double coef_x= 0.5, coef_y= 0.5;
   const double min_circularity= 0.70;
   const double acceptable_circularity= 0.50;
+  // std::cout<<min_area<<std::endl;
 
   for(int index=0; index<data.v_red_contours.size(); ++index)
   {
@@ -135,13 +134,9 @@ void Sign_Detection::filter_red_contours(Data_pic& data)
         std::cout<<"Circularity: "  << circularity << std::endl;
 
       std::vector<cv::Point> poly;
-      cv::approxPolyDP(Mat(contour), poly, arcLength(Mat(contour), true) * 0.01, true);
-
       cv::approxPolyDP(contour, poly, 0.02*perimeter, true);
 
       std::cout<<"Lados: "<<poly.size()<<std::endl;
-
-      // switch(poly.size());
 
       if(circularity>min_circularity || poly.size()==3 || poly.size()==8)
       {
@@ -150,11 +145,11 @@ void Sign_Detection::filter_red_contours(Data_pic& data)
           Sign found;
           found.color= Color::red;
           found.shape= Shape::circular;
-          minEnclosingCircle((Mat)contour, found.center, found.radius);
+
           found.roi= boundingRect(contour);
 
-          if(poly.size()==8)        // TO-CHECK: demasiado común
-            found.sign_type= Sign_type::stop;
+          // if(poly.size()==8)                       // Ojalá
+          //   found.sign_type= Sign_type::stop;
 
           data.v_signs.push_back(found);
         }
@@ -167,7 +162,6 @@ void Sign_Detection::filter_red_contours(Data_pic& data)
           data.v_signs.push_back(found);
         }
 
-
         // for(int i=0; i<poly.size(); ++i)            // DEBUG
         // {
         //   line(Pic, poly[i], poly[i+1], GREEN, 1);
@@ -175,11 +169,10 @@ void Sign_Detection::filter_red_contours(Data_pic& data)
         //     line(Pic, poly[i], poly[0], GREEN, 1);
         // }
         // show_pic(Pic, "poly");
-
         // v_ellipse.push_back(fitEllipse(contour));   // DEBUG
         // v_rotated_rect.push_back(rotated_rect);
         //
-        // drawContours(Pic, data.v_red_contours, index, GREEN, 1);        // Debug
+        // drawContours(Pic, data.v_red_contours, index, GREEN, 1);      // Debug
         // ellipse(Pic, v_ellipse.back(), YELLOW, 1);                    // Debug
         // Point2f rect_points[4]; rotated_rect.points(rect_points);     // Debug
         // draw_rectangle(Pic, rect_points, BLUE);                       // Debug
@@ -194,5 +187,106 @@ void Sign_Detection::filter_red_contours(Data_pic& data)
 
 void Sign_Detection::filter_blue_contours(Data_pic& data)
 {
+  Mat Pic= data.Pic_color.clone();
 
+  // std::vector<Mat> v_Pic_roi;
+  // std::vector<RotatedRect>  v_rotated_rect;
+  // std::vector<RotatedRect>  v_ellipse;
+  // v_rotated_rect.reserve(data.v_blue_contours.size());
+  // v_ellipse.reserve(data.v_blue_contours.size());
+  // v_Pic_roi.reserve(data.v_blue_contours.size());
+  double min_area= 0.1 * sqrt(static_cast<double>(data.Pic_HSV_blue.rows) * static_cast<double>(data.Pic_HSV_blue.cols));
+  const double coef_x= 0.5, coef_y= 0.5;
+  const double min_circularity= 0.70;
+  const double acceptable_circularity= 0.50;
+  // std::cout<<min_area<<std::endl;
+
+  for(int index=0; index<data.v_blue_contours.size(); ++index)
+  {
+
+    auto contour= data.v_blue_contours[index];
+    auto rotated_rect= minAreaRect(contour);
+
+    double area= contourArea(contour, false);
+    double perimeter= arcLength(contour, true);
+    double circularity= 4*PI*area/(perimeter*perimeter);
+
+    if(area > min_area && rotated_rect.size.height > coef_y*min_area && rotated_rect.size.width > coef_x*min_area)
+    {
+        std::cout<<"Circularity: "  << circularity << std::endl;
+
+      std::vector<cv::Point> poly;
+      cv::approxPolyDP(contour, poly, 0.02*perimeter, true);
+
+      std::cout<<"Lados: "<<poly.size()<<std::endl;
+
+      if(circularity>min_circularity || poly.size()==4)
+      {
+        if(circularity>min_circularity)
+        {
+          Sign found;
+          found.color= Color::blue;
+          found.shape= Shape::circular;
+
+          found.roi= boundingRect(contour);
+
+          data.v_signs.push_back(found);
+        }
+        else if(circularity>acceptable_circularity && poly.size()==4)
+        {
+          Sign found;
+          found.color= Color::blue;
+          found.shape= Shape::rectangular;
+
+          data.v_signs.push_back(found);
+        }
+
+        // for(int i=0; i<poly.size(); ++i)            // DEBUG
+        // {
+        //   line(Pic, poly[i], poly[i+1], GREEN, 1);
+        //   if(i==poly.size()-1)
+        //     line(Pic, poly[i], poly[0], GREEN, 1);
+        // }
+        // show_pic(Pic, "poly");
+        // v_ellipse.push_back(fitEllipse(contour));   // DEBUG
+        // v_rotated_rect.push_back(rotated_rect);
+        //
+        // drawContours(Pic, data.v_blue_contours, index, GREEN, 1);      // Debug
+        // ellipse(Pic, v_ellipse.back(), YELLOW, 1);                    // Debug
+        // Point2f rect_points[4]; rotated_rect.points(rect_points);     // Debug
+        // draw_rectangle(Pic, rect_points, BLUE);                       // Debug
+        //
+        // show_pic(Pic, "contours");
+        // waitKey();
+      }
+    }
+  }
+  // destroyAllWindows();
+}
+
+void Sign_Detection::print_info(Sign sign)
+{
+  std::string forma;
+  switch(as_integer(sign.shape))
+  {
+  case 1:
+    forma= "Circular";
+    break;
+  case 2:
+    forma= "Rectangular";
+    break;
+  case 3:
+    forma="Triangular";
+    break;
+  default:
+    forma="Desconocida";
+  }
+
+  std::string color= as_integer(sign.color)==1
+  ? "Rojo"
+  : "Azul";
+
+  std::cout<<"Nombre: "<< sign.name<<std::endl;
+  std::cout<<"Forma: "<<  forma<<std::endl;
+  std::cout<<"Color: "<<  color<<std::endl;
 }
