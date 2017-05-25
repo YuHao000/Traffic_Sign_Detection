@@ -20,24 +20,6 @@ Sign_Detection::Sign_Detection()
   assert(0);
 }
 
-Sign_Detection::Sign_Detection(const int& argc, char* argv[])
-{
-  std::vector<std::string> v_picName;
-  std::vector<cv::Mat> v_loaded_pics;
-
-  loadStatus= cv_lib::init_pic(argc, argv, v_picName, v_loaded_pics);
-
-  for(const auto& Pic:v_loaded_pics)
-  {
-    Data_pic instance;
-    color_pic(Pic, instance.Pic_color);
-    fix_size(instance.Pic_color, instance.Pic_color);
-    grey_pic(instance.Pic_color, instance.Pic_grey);
-    // instance.Pic_color.convertTo(instance.Pic_color_high_contrast, -1, 2, 0);
-    HSV_pic(instance.Pic_color_high_contrast, instance.Pic_HSV);
-  }
-
-}
 
 Sign_Detection::Sign_Detection(const std::string relative_path)
 : samples_path(relative_path)
@@ -53,6 +35,7 @@ Sign_Detection::Sign_Detection(const std::string relative_path)
     color_pic(v_loaded_pics[i], instance.Pic_color);
     fix_size(instance.Pic_color, instance.Pic_color);
     grey_pic(instance.Pic_color, instance.Pic_grey);
+    th_pic(instance.Pic_grey, instance.Pic_th);
     HSV_pic(instance.Pic_color, instance.Pic_HSV);
 
     v_data.push_back(instance);
@@ -63,6 +46,39 @@ Sign_Detection::~Sign_Detection()
 {
 
 }
+
+int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // TO-IMPROVE
+
+    static int n_pic=0;
+
+    for(int i=1; i<argc; ++i)
+    {
+      ++n_pic;
+
+      if(argc < n_pic+1) {
+        std::cout<<"Missing picture name"<<std::endl;
+        return -1;
+      }
+
+      Mat pic= imread( argv[n_pic], CV_LOAD_IMAGE_UNCHANGED);
+
+      if( pic.empty())  {
+        std::cout<<"Error opening picture file "<<argv[n_pic]<<std::endl;
+        return -1;
+      }
+      else
+        v_templates.push_back(pic);
+
+      char chpicName[CHL];
+      strcpy(chpicName, argv[n_pic]);
+      std::string picName(chpicName);
+
+      int n= picName.find("templates/");
+      picName.erase(picName.begin(), picName.begin() + n + 10);
+      v_picNames.push_back(picName);
+    }
+    return 0;
+  }
 
 void Sign_Detection::extract_red_HSV(Data_pic& data)  // TO:CHECK:
 {
@@ -91,7 +107,7 @@ void Sign_Detection::extract_blue_HSV(Data_pic& data)
   // show_pic(blue_hue, "HSV blue th");
 }
 
-void Sign_Detection::filter_red_contours(Data_pic& data)gg
+void Sign_Detection::filter_red_contours(Data_pic& data)
 {
   Mat Pic= data.Pic_color.clone();
 
@@ -105,7 +121,6 @@ void Sign_Detection::filter_red_contours(Data_pic& data)gg
   double min_area= 0.1 * sqrt(static_cast<double>(data.Pic_HSV_red.rows) * static_cast<double>(data.Pic_HSV_red.cols));
   // std::cout<<min_area<<std::endl;    // TO-CHECK
   const double coef_x= 0.5, coef_y= 0.5;
-  const double percentaje_true_contours= 0.65;
   const double min_circularity= 0.75;
   const double acceptable_circularity= 0.50;
 
@@ -138,9 +153,11 @@ void Sign_Detection::filter_red_contours(Data_pic& data)gg
           Sign found;
           found.color= Color::red;
           found.shape= Shape::circular;
+          minEnclosingCircle((Mat)contour, found.center, found.radius);
+          found.roi= boundingRect(contour);
 
           if(poly.size()==8)        // TO-CHECK: demasiado común
-            found.name= Name::stop;
+            found.sign_type= Sign_type::stop;
 
           data.v_signs.push_back(found);
         }

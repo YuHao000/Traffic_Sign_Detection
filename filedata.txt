@@ -1,14 +1,5 @@
 filename="Traffic_Sign_Detection"
-imagename1="../samples/señales.jpg"
-imagename2="../samples/flechas.jpg"
-imagename3="../samples/obras.jpg"
-imagename4="../samples/stop.jpeg"
-imagename5="../samples/prohibido.jpeg"
-imagename6="../samples/triangulares.jpeg"
-imagename7="../samples/stop_derecha.jpeg"
-imagename8="../samples/peaton.jpg"
-imagename9="../samples/paso_ciclista.jpeg"
-imagename10=../samples/peatones.jpeg""
-imagename11=../samples/stop_2.jpeg
+imagename1="../samples/templates/STOP_template.png"
+
 
 

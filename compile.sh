@@ -10,10 +10,10 @@ cmake ..  #&> /dev/null
 make -j$n_cores -b
 
 # Loading all pics in samples/
-./Traffic_Sign_Detection
+#./Traffic_Sign_Detection
 
 # Loading just some pics from samples/
-#./Traffic_Sign_Detection $imagename1 $imagename2 $imagename3 $imagename4 $imagename5
+./Traffic_Sign_Detection $imagename1 $imagename2 $imagename3 $imagename4 $imagename5
 
 
 # set -e

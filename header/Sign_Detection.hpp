@@ -23,25 +23,33 @@ enum class Shape {unknown_shape, triangular, circular, rectangular};
 
 enum class Color {unknown_color, red, blue};
 
-enum class Name {unknown_name, stop, prohibido, no_circulacion, circulacion_obligatoria, ceda, peaton, aparcamiento, paso_zebra, minusvalidos, taxi};
+enum class Sign_type {unknown_name, stop, prohibido, no_circulacion, circulacion_obligatoria, ceda, peaton, aparcamiento, paso_zebra, minusvalidos, taxi};
 
 class Sign
 {
 public:
   Sign()
-    :shape(Shape::unknown_shape), color(Color::unknown_color), name(Name::unknown_name)
+    :shape(Shape::unknown_shape), color(Color::unknown_color), sign_type(Sign_type::unknown_name), radius(0)
    {
 
    }
 
+  std::string name;
   Shape shape;
   Color color;
-  Name name;
+  Sign_type sign_type;
+
+  cv::Rect roi;
+
+  cv::Point2f center; // circular ones
+  float radius;
 };
 
 class Data_pic
 {
 public:
+  Data_pic() {};
+
   int index;
   std::string picName;
   cv::Mat Pic_color;
@@ -51,7 +59,7 @@ public:
   cv::Mat Pic_HSV_red;
   cv::Mat Pic_HSV_blue;
   cv::Mat Pic_th;
-  cv::Mat Pic_roi;
+
   cv::Mat Pic_final;
   std::vector<std::vector<cv::Point> >  v_contours;
   std::vector<std::vector<cv::Point> >  v_red_contours;
@@ -68,7 +76,11 @@ public:
   Sign_Detection(const int& argc, char* argv[]);
   ~Sign_Detection();
 
+  int load_templates(const int& argc, char* argv[]);
+
   std::vector<Data_pic> get_v_data() const { return v_data; }
+  std::vector<cv::Mat> v_templates;
+  std::vector<std::string> v_picNames;
   bool get_loadStatus()             const { return loadStatus; }
   void extract_red_HSV(Data_pic& data);
   void extract_blue_HSV(Data_pic& data);
