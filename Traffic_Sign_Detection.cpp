@@ -42,10 +42,10 @@ int main(int argc, char* argv[])
         show_pic(data.Pic_color_high_contrast, "High contrast");
 
     instance.extract_red_HSV(data);
-        show_pic(data.Pic_HSV_red, "Red");
+      show_pic(data.Pic_HSV_red, "Red");
     create_contours(data.Pic_HSV_red, data.v_red_contours);
-    instance.filter_red_contours(data);
 
+    instance.filter_red_contours(data);
     // show_pic(data.Pic_color, "Color");
     show_pic(data.Pic_th, "th");
     waitKey(0);
@@ -57,20 +57,30 @@ int main(int argc, char* argv[])
         unsigned index=0;
         for(const auto& circular_template:instance.v_templates)
         {
+          std::cout<<"Template #"<<index+1<<"/"<<instance.v_templates.size()<<std::endl;
           Mat result;
           if(cv_lib::template_matching(data.Pic_HSV_red, possible_sign.roi, circular_template)==true)
           {
             int pos= instance.v_picNames[index].find("_template");
             std::string name(instance.v_picNames[index], 0, pos);
             possible_sign.name= name;
-            std::cout<<"This is a "<<name<<std::endl;
+            std::cout<<"This is a "<<name<<std::endl<<std::endl<<std::endl;
             break;
+          }
+          else
+          {
+            int pos= instance.v_picNames[index].find("_template");
+            std::string name(instance.v_picNames[index], 0, pos);
+            possible_sign.name= name;
+            std::cout<<"This is NOT a "<<name<<std::endl;
           }
 
           ++index;
           waitKey();
         }
       }
+
+      destroyAllWindows();
 
     }
     // show_pic(data.Pic_HSV_blue, "Blue");

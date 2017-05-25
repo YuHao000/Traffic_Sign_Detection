@@ -80,8 +80,7 @@ int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // TO-IMPR
     return 0;
   }
 
-void Sign_Detection::extract_red_HSV(Data_pic& data)  // TO:CHECK:
-{
+void Sign_Detection::extract_red_HSV(Data_pic& data)  {
   Mat red_hue;
 
   Mat red_hue_upper;
@@ -96,8 +95,7 @@ void Sign_Detection::extract_red_HSV(Data_pic& data)  // TO:CHECK:
   // show_pic(red_hue, "HSV red th");
 }
 
-void Sign_Detection::extract_blue_HSV(Data_pic& data)
-{
+void Sign_Detection::extract_blue_HSV(Data_pic& data) {
   Mat blue_hue;
 
   cv::inRange(data.Pic_HSV, BLUE_HSV_LOW, BLUE_HSV_HIGH, blue_hue);
@@ -117,11 +115,10 @@ void Sign_Detection::filter_red_contours(Data_pic& data)
   v_rotated_rect.reserve(data.v_red_contours.size());
   v_ellipse.reserve(data.v_red_contours.size());
   v_Pic_roi.reserve(data.v_red_contours.size());
-
   double min_area= 0.1 * sqrt(static_cast<double>(data.Pic_HSV_red.rows) * static_cast<double>(data.Pic_HSV_red.cols));
   // std::cout<<min_area<<std::endl;    // TO-CHECK
   const double coef_x= 0.5, coef_y= 0.5;
-  const double min_circularity= 0.75;
+  const double min_circularity= 0.70;
   const double acceptable_circularity= 0.50;
 
   for(int index=0; index<data.v_red_contours.size(); ++index)
@@ -171,24 +168,24 @@ void Sign_Detection::filter_red_contours(Data_pic& data)
         }
 
 
-        for(int i=0; i<poly.size(); ++i)            // DEBUG
-        {
-          line(Pic, poly[i], poly[i+1], GREEN, 1);
-          if(i==poly.size()-1)
-          line(Pic, poly[i], poly[0], GREEN, 1);
-        }
+        // for(int i=0; i<poly.size(); ++i)            // DEBUG
+        // {
+        //   line(Pic, poly[i], poly[i+1], GREEN, 1);
+        //   if(i==poly.size()-1)
+        //     line(Pic, poly[i], poly[0], GREEN, 1);
+        // }
         // show_pic(Pic, "poly");
 
-        v_ellipse.push_back(fitEllipse(contour));
-        v_rotated_rect.push_back(rotated_rect);
-
-        drawContours(Pic, data.v_red_contours, index, GREEN, 1);        // Debug
-        ellipse(Pic, v_ellipse.back(), YELLOW, 1);                    // Debug
-        Point2f rect_points[4]; rotated_rect.points(rect_points);     // Debug
-        draw_rectangle(Pic, rect_points, BLUE);                       // Debug
-
-        show_pic(Pic, "contours");
-        waitKey();
+        // v_ellipse.push_back(fitEllipse(contour));   // DEBUG
+        // v_rotated_rect.push_back(rotated_rect);
+        //
+        // drawContours(Pic, data.v_red_contours, index, GREEN, 1);        // Debug
+        // ellipse(Pic, v_ellipse.back(), YELLOW, 1);                    // Debug
+        // Point2f rect_points[4]; rotated_rect.points(rect_points);     // Debug
+        // draw_rectangle(Pic, rect_points, BLUE);                       // Debug
+        //
+        // show_pic(Pic, "contours");
+        // waitKey();
       }
     }
   }

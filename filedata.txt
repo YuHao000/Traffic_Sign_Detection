@@ -1,5 +1,6 @@
 filename="Traffic_Sign_Detection"
 imagename1="../samples/templates/STOP_template.png"
+imagename2="../samples/templates/prohibido_template.png"
 
 
 
