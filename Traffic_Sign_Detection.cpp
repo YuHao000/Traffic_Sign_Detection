@@ -22,15 +22,16 @@
 using namespace cv;
 using namespace cv_lib;
 
-const std::string relative_path("../samples");
+const std::string samples_relative_path("../samples/");
+const std::string templates_relative_path("../templates/");
 
 int main(int argc, char* argv[])
 {
   // Sign_Detection instance(argc, argv);                      // Deprecated: loads samples from Filedata.txt
-  Sign_Detection instance(relative_path);
+  Sign_Detection instance(samples_relative_path, templates_relative_path);
 
-  // int loadStatus=instance.load_templates(argc, argv);       // Deprecated: loads only a single type from Filedata.txt
-  int loadStatus=instance.load_templates("../templates/");
+  // int loadStatus=instance.load_templates(argc, argv);
+  int loadStatus=instance.load_templates();
 
   assert(!instance.get_v_templates_red().empty());
   assert(!instance.get_v_templates_blue().empty());
@@ -42,14 +43,16 @@ int main(int argc, char* argv[])
 
   for(auto& data:instance.get_v_data())
   {
+    show_pic(data.Pic_color, "Image");
+
     data.Pic_color.convertTo(data.Pic_color_high_contrast, -1, 2, 0);     // 2x contrast
     HSV_pic(data.Pic_color_high_contrast, data.Pic_HSV);                  // Re-write
-    show_pic(data.Pic_color_high_contrast, "High contrast");
+    // show_pic(data.Pic_color_high_contrast, "High contrast");
       // show_pic(data.Pic_th, "th");
 
     // Red:
     instance.extract_red_HSV(data);
-      show_pic(data.Pic_HSV_red, "Red");
+      // show_pic(data.Pic_HSV_red, "Red");
 
     create_contours(data.Pic_HSV_red, data.v_red_contours);
     instance.filter_red_contours(data);
@@ -57,12 +60,12 @@ int main(int argc, char* argv[])
 
     // Blue:
     instance.extract_blue_HSV(data);
-      show_pic(data.Pic_HSV_blue, "Blue");
+      // show_pic(data.Pic_HSV_blue, "Blue");
 
     create_contours(data.Pic_HSV_blue, data.v_blue_contours);
     instance.filter_blue_contours(data);
 
-    waitKey(0);
+    waitKey();
 
     // show_pic(data.Pic_color, "Color");
     for(auto& possible_sign:data.v_signs)
@@ -115,7 +118,7 @@ int main(int argc, char* argv[])
           {
             // std::cout<<"Template # "<<index+1<<"/"<<instance.get_v_templates_blue().size()<<std::endl;
             Mat result;
-            waitKey();
+            // waitKey();
             if(cv_lib::template_matching(data.Pic_HSV_blue, possible_sign.roi, circular_template, 0.80)==true)
             {
               int pos= instance.get_v_picNames_blue()[index].find("_template");
@@ -151,22 +154,13 @@ int main(int argc, char* argv[])
       {
         std::cout<<"Unclasified colorr"<<std::endl;
       }
+
+      show_pic(data.Pic_color(possible_sign.roi), "Traffic sign");
       instance.print_info(possible_sign);
+
       waitKey();
-      destroyAllWindows();
-
     }
-    // show_pic(data.Pic_HSV_blue, "Blue");
-
-    // Mat closed;
-    // morpho_pic(data.Pic_HSV_red, data.Pic_HSV_red, 3, MORPH_CLOSE);
-    // morpho_pic(data.Pic_HSV_red, data.Pic_HSV_red, 3, MORPH_OPEN);
-    //  show_pic(data.Pic_HSV_red, "closed");
-
-
-    continue;
-
-    waitKey();
+    // destroyAllWindows();
   }
 
   waitKey();

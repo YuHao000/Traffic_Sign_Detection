@@ -17,12 +17,12 @@ using namespace cv_lib;
 
 Sign_Detection::Sign_Detection()
 {
-  assert(0);
+  assert(0 && "This constructor is not intended to be used");
 }
 
 
-Sign_Detection::Sign_Detection(const std::string relative_path)
-: samples_path(relative_path)
+Sign_Detection::Sign_Detection(const std::string relative_samples_path, const std::string relative_templates_path)
+: samples_path(relative_samples_path), templates_path(relative_templates_path)
 {
   std::vector<std::string> v_picName;
   std::vector<cv::Mat> v_loaded_pics;
@@ -47,47 +47,47 @@ Sign_Detection::~Sign_Detection()
 
 }
 
-int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // Deprecated: loads only red ones using Filedata.txt
+// int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // Deprecated: loads only red ones using Filedata.txt
+//
+//     static int n_pic=0;
+//
+//     for(int i=1; i<argc; ++i)
+//     {
+//       ++n_pic;
+//
+//       if(argc < n_pic+1) {
+//         std::cout<<"Missing picture name"<<std::endl;
+//         return -1;
+//       }
+//
+//       Mat pic= imread( argv[n_pic], CV_LOAD_IMAGE_UNCHANGED);
+//
+//       if( pic.empty())  {
+//         std::cout<<"Error opening picture file "<<argv[n_pic]<<std::endl;
+//         return -1;
+//       }
+//       else
+//         v_templates_red.push_back(pic);
+//
+//       char chpicName[CHL];
+//       strcpy(chpicName, argv[n_pic]);
+//       std::string picName(chpicName);
+//
+//       int n= picName.find("templates/");
+//       picName.erase(picName.begin(), picName.begin() + n + 10);
+//       v_picNames_red.push_back(picName);
+//     }
+//     return 0;
+//   }
 
-    static int n_pic=0;
-
-    for(int i=1; i<argc; ++i)
-    {
-      ++n_pic;
-
-      if(argc < n_pic+1) {
-        std::cout<<"Missing picture name"<<std::endl;
-        return -1;
-      }
-
-      Mat pic= imread( argv[n_pic], CV_LOAD_IMAGE_UNCHANGED);
-
-      if( pic.empty())  {
-        std::cout<<"Error opening picture file "<<argv[n_pic]<<std::endl;
-        return -1;
-      }
-      else
-        v_templates_red.push_back(pic);
-
-      char chpicName[CHL];
-      strcpy(chpicName, argv[n_pic]);
-      std::string picName(chpicName);
-
-      int n= picName.find("templates/");
-      picName.erase(picName.begin(), picName.begin() + n + 10);
-      v_picNames_red.push_back(picName);
-    }
-    return 0;
-  }
-
-int Sign_Detection::load_templates(const std::string relative_path) {
+int Sign_Detection::load_templates() {
   int return_value= 0;
 
   // Red templates
 
   std::vector<cv::String> v_paths;
 
-  cv::String _pattern_red(relative_path + "red_templates/");
+  cv::String _pattern_red(templates_path + "red_templates/");
   cv::glob(_pattern_red, v_paths);
 
   v_templates_red.reserve(v_paths.size());
@@ -111,14 +111,15 @@ int Sign_Detection::load_templates(const std::string relative_path) {
 
     std::string picName(chpicName);
 
-    int n= picName.find("red_templates/");
-    picName.erase(picName.begin(), picName.begin() + n + 14);
-    v_picNames_red.push_back(picName);
+    int n1= picName.find("red_templates/");
+    picName.erase(picName.begin(), picName.begin() + n1 + 14);
+    int n2= picName.find("__");
+    v_picNames_red.push_back(std::string(picName, n2 + 2));
   }
 
   // Blue templates
 
-  cv::String _pattern_blue(relative_path + "blue_templates/");
+  cv::String _pattern_blue(templates_path + "blue_templates/");
   cv::glob(_pattern_blue, v_paths);
 
   v_templates_blue.reserve(v_paths.size());
@@ -142,9 +143,10 @@ int Sign_Detection::load_templates(const std::string relative_path) {
 
     std::string picName(chpicName);
 
-    int n= picName.find("blue_templates/");
-    picName.erase(picName.begin(), picName.begin() + n + 15);
-    v_picNames_blue.push_back(picName);
+    int n1= picName.find("blue_templates/");
+    picName.erase(picName.begin(), picName.begin() + n1 + 15);
+    int n2= picName.find("__");
+    v_picNames_blue.push_back(std::string(picName, n2 + 2));
   }
 
   return return_value;
@@ -260,8 +262,7 @@ void Sign_Detection::filter_red_contours(Data_pic& data)  {
   // destroyAllWindows();
 }
 
-void Sign_Detection::filter_blue_contours(Data_pic& data)
-{
+void Sign_Detection::filter_blue_contours(Data_pic& data) {
   Mat Pic= data.Pic_color.clone();
 
   // std::vector<Mat> v_Pic_roi;
@@ -326,7 +327,7 @@ void Sign_Detection::filter_blue_contours(Data_pic& data)
         // v_ellipse.push_back(fitEllipse(contour));   // DEBUG
         // v_rotated_rect.push_back(rotated_rect);
         //
-        // drawContours(Pic, data.v_blue_contours, index, GREEN, 1);      // Debug
+        // drawContours(Pic, data.v_blue_contours, index, GREEN, 1);     // Debug
         // ellipse(Pic, v_ellipse.back(), YELLOW, 1);                    // Debug
         // Point2f rect_points[4]; rotated_rect.points(rect_points);     // Debug
         // draw_rectangle(Pic, rect_points, BLUE);                       // Debug
@@ -363,4 +364,5 @@ void Sign_Detection::print_info(Sign sign)  {
   std::cout<<"Nombre: "<< sign.name<<std::endl;
   std::cout<<"Forma: "<<  forma<<std::endl;
   std::cout<<"Color: "<<  color<<std::endl;
+  std::cout<<std::endl<<std::endl;
 }

@@ -75,12 +75,12 @@ class Sign_Detection
 {
 public:
   Sign_Detection();
-  Sign_Detection(const std::string relative_path);
-  Sign_Detection(const int& argc, char* argv[]);  // Deprecated
+  Sign_Detection(const std::string relative_samples_path, const std::string relative_templates_path);
+  // Sign_Detection(const int& argc, char* argv[]);  // Deprecated
   ~Sign_Detection();
 
-  int load_templates(const int& argc, char* argv[]);
-  int load_templates(const std::string relative_path);
+  // int load_templates(const int& argc, char* argv[]);
+  int load_templates();
 
   void extract_red_HSV      (Data_pic& data);
   void extract_blue_HSV     (Data_pic& data);
@@ -103,6 +103,7 @@ private:
   std::vector<std::string>  v_picNames_red;
   std::vector<std::string>  v_picNames_blue;
   std::string samples_path;
+  std::string templates_path;
   };
 
 
