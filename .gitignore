@@ -31,5 +31,7 @@
 *.out
 *.app
 
+*.zip
+
 build/
 samples/other
