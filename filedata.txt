@@ -1,5 +1,0 @@
-filename="Traffic_Sign_Detection"
-imagename1="../samples/red_templates/STOP_template.png"
-imagename2="../samples/red_templates/prohibido_template.png"
-imagename3="../samples/red_templates/no_circulacion_template.png"
-

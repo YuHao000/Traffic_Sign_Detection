@@ -1,26 +1,18 @@
 #!/bin/bash
 clear
 set -e
+export env_filename=Traffic_Sign_Detection
 n_cores=`cat /proc/cpuinfo | grep processor | wc -l`
 let "n_cores++"
-source filedata.txt
-export env_filename=$filename
 mkdir -p build && cd build
-cmake ..  #&> /dev/null 
+cmake ..  &> /dev/null 
 make -j$n_cores -b
 
-# Loading all pics in samples/
-#./Traffic_Sign_Detection
-
-# Loading just some pics from samples/
-./Traffic_Sign_Detection $imagename1 $imagename2 $imagename3 $imagename4 $imagename5
+./Traffic_Sign_Detection
 
 
 # set -e
 #   Any subsequent(*) commands failing makes the shell script to exit.
-
-# source filedata.txt
-#   Reads variables from filedata.txt
 
 # mkdir -p
 #   creates a folder only if it doesn't exist
