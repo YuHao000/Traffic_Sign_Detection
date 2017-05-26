@@ -47,7 +47,7 @@ Sign_Detection::~Sign_Detection()
 
 }
 
-int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // TO-IMPROVE
+int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // Deprecated: loads only red ones using Filedata.txt
 
     static int n_pic=0;
 
@@ -67,7 +67,7 @@ int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // TO-IMPR
         return -1;
       }
       else
-        v_templates.push_back(pic);
+        v_templates_red.push_back(pic);
 
       char chpicName[CHL];
       strcpy(chpicName, argv[n_pic]);
@@ -75,10 +75,85 @@ int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // TO-IMPR
 
       int n= picName.find("templates/");
       picName.erase(picName.begin(), picName.begin() + n + 10);
-      v_picNames.push_back(picName);
+      v_picNames_red.push_back(picName);
     }
     return 0;
   }
+
+int Sign_Detection::load_templates(const std::string relative_path) {
+  int return_value= 0;
+
+  // Red templates
+
+  std::vector<cv::String> v_paths;
+
+  cv::String _pattern_red(relative_path + "red_templates/");
+  cv::glob(_pattern_red, v_paths);
+
+  v_templates_red.reserve(v_paths.size());
+  v_picNames_red.reserve(v_paths.size());
+
+  for(unsigned i=0; i<v_paths.size(); ++i)
+  {
+    Mat myPic= imread(v_paths[i], CV_LOAD_IMAGE_UNCHANGED);
+
+    if(myPic.empty())
+    {
+      std::cout<<"Error opening picture file "<<v_paths[i]<<std::endl;
+      // return -1;
+      return_value=-1;
+      continue;
+    }
+    v_templates_red.push_back(myPic);
+
+    char chpicName[CHL];
+    strcpy(chpicName, v_paths[i].c_str());
+
+    std::string picName(chpicName);
+
+    int n= picName.find("red_templates/");
+    picName.erase(picName.begin(), picName.begin() + n + 14);
+    v_picNames_red.push_back(picName);
+  }
+
+  // Blue templates
+
+  cv::String _pattern_blue(relative_path + "blue_templates/");
+  cv::glob(_pattern_blue, v_paths);
+
+  v_templates_blue.reserve(v_paths.size());
+  v_picNames_blue.reserve(v_paths.size());
+
+  for(unsigned i=0; i<v_paths.size(); ++i)
+  {
+    Mat myPic= imread(v_paths[i], CV_LOAD_IMAGE_UNCHANGED);
+
+    if(myPic.empty())
+    {
+      std::cout<<"Error opening picture file "<<v_paths[i]<<std::endl;
+      // return -1;
+      return_value=-1;
+      continue;
+    }
+    v_templates_blue.push_back(myPic);
+
+    char chpicName[CHL];
+    strcpy(chpicName, v_paths[i].c_str());
+
+    std::string picName(chpicName);
+
+    int n= picName.find("blue_templates/");
+    picName.erase(picName.begin(), picName.begin() + n + 15);
+    v_picNames_blue.push_back(picName);
+  }
+
+  return return_value;
+}
+
+void Sign_Detection::normalize_templates()  {
+  fix_size(v_templates_red);
+  fix_size(v_templates_blue);
+}
 
 void Sign_Detection::extract_red_HSV(Data_pic& data)  {
   Mat red_hue;
@@ -131,12 +206,12 @@ void Sign_Detection::filter_red_contours(Data_pic& data)  {
 
     if(area > min_area && rotated_rect.size.height > coef_y*min_area && rotated_rect.size.width > coef_x*min_area)
     {
-        std::cout<<"Circularity: "  << circularity << std::endl;
+        // std::cout<<"Circularity: "  << circularity << std::endl;
 
       std::vector<cv::Point> poly;
       cv::approxPolyDP(contour, poly, 0.02*perimeter, true);
 
-      std::cout<<"Lados: "<<poly.size()<<std::endl;
+      // std::cout<<"Lados: "<<poly.size()<<std::endl;
 
       if(circularity>min_circularity || poly.size()==3 || poly.size()==8)
       {
@@ -213,12 +288,12 @@ void Sign_Detection::filter_blue_contours(Data_pic& data)
 
     if(area > min_area && rotated_rect.size.height > coef_y*min_area && rotated_rect.size.width > coef_x*min_area)
     {
-        std::cout<<"Circularity: "  << circularity << std::endl;
+        // std::cout<<"Circularity: "  << circularity << std::endl;
 
       std::vector<cv::Point> poly;
       cv::approxPolyDP(contour, poly, 0.02*perimeter, true);
 
-      std::cout<<"Lados: "<<poly.size()<<std::endl;
+      // std::cout<<"Lados: "<<poly.size()<<std::endl;
 
       if(circularity>min_circularity || poly.size()==4)
       {
@@ -264,8 +339,7 @@ void Sign_Detection::filter_blue_contours(Data_pic& data)
   // destroyAllWindows();
 }
 
-void Sign_Detection::print_info(Sign sign)
-{
+void Sign_Detection::print_info(Sign sign)  {
   std::string forma;
   switch(as_integer(sign.shape))
   {

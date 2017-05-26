@@ -26,11 +26,17 @@ const std::string relative_path("../samples");
 
 int main(int argc, char* argv[])
 {
-  // Sign_Detection instance(argc, argv);
+  // Sign_Detection instance(argc, argv);                      // Deprecated: loads samples from Filedata.txt
   Sign_Detection instance(relative_path);
 
-  int loadStatus=instance.load_templates(argc, argv);
-  fix_size(instance.v_templates);
+  // int loadStatus=instance.load_templates(argc, argv);       // Deprecated: loads only a single type from Filedata.txt
+  int loadStatus=instance.load_templates("../templates/");
+
+  assert(!instance.get_v_templates_red().empty());
+  assert(!instance.get_v_templates_blue().empty());
+
+  instance.normalize_templates();
+
   if(instance.get_loadStatus() < 0 || loadStatus<0)
     return EXIT_FAILURE;
 
@@ -38,48 +44,114 @@ int main(int argc, char* argv[])
   {
     data.Pic_color.convertTo(data.Pic_color_high_contrast, -1, 2, 0);     // 2x contrast
     HSV_pic(data.Pic_color_high_contrast, data.Pic_HSV);                  // Re-write
+    show_pic(data.Pic_color_high_contrast, "High contrast");
+      // show_pic(data.Pic_th, "th");
 
-        show_pic(data.Pic_color_high_contrast, "High contrast");
-
+    // Red:
     instance.extract_red_HSV(data);
       show_pic(data.Pic_HSV_red, "Red");
-    create_contours(data.Pic_HSV_red, data.v_red_contours);
 
+    create_contours(data.Pic_HSV_red, data.v_red_contours);
     instance.filter_red_contours(data);
-    // show_pic(data.Pic_color, "Color");
-    show_pic(data.Pic_th, "th");
+
+
+    // Blue:
+    instance.extract_blue_HSV(data);
+      show_pic(data.Pic_HSV_blue, "Blue");
+
+    create_contours(data.Pic_HSV_blue, data.v_blue_contours);
+    instance.filter_blue_contours(data);
+
     waitKey(0);
 
+    // show_pic(data.Pic_color, "Color");
     for(auto& possible_sign:data.v_signs)
     {
-      if(possible_sign.shape == Shape::circular)
+      if(possible_sign.color == Color::red)
       {
-        unsigned index=0;
-        for(const auto& circular_template:instance.v_templates)
+        if(possible_sign.shape == Shape::circular)
         {
-          // std::cout<<"Template # "<<index+1<<"/"<<instance.v_templates.size()<<std::endl;
-          Mat result;
-          if(cv_lib::template_matching(data.Pic_HSV_red, possible_sign.roi, circular_template)==true)
+          unsigned index=0;
+          for(const auto& circular_template:instance.get_v_templates_red())
           {
-            int pos= instance.v_picNames[index].find("_template");
-            std::string name(instance.v_picNames[index], 0, pos);
-            possible_sign.name= name;
-            // std::cout<<"This is a "<<name<<std::endl<<std::endl<<std::endl;
-            instance.print_info(possible_sign);
-            break;
-          }
-          else
-          {
-            int pos= instance.v_picNames[index].find("_template");
-            std::string name(instance.v_picNames[index], 0, pos);
-            possible_sign.name= name;
-            // std::cout<<"This is NOT a "<<name<<std::endl;
-          }
+            // std::cout<<"Template # "<<index+1<<"/"<<instance.v_templates_red.size()<<std::endl;
+            Mat result;
+            if(cv_lib::template_matching(data.Pic_HSV_red, possible_sign.roi, circular_template, 0.75)==true)
+            {
+              int pos= instance.get_v_picNames_red()[index].find("_template");
+              std::string name(instance.get_v_picNames_red()[index], 0, pos);
+              possible_sign.name= name;
+              // std::cout<<"This is a "<<name<<std::endl<<std::endl<<std::endl;
+              // instance.print_info(possible_sign);
+              break;
+            }
+            else
+            {
+              int pos= instance.get_v_picNames_red()[index].find("_template");
+              std::string name(instance.get_v_picNames_red()[index], 0, pos);
+              possible_sign.name= name;
+              // std::cout<<"This is NOT a "<<name<<std::endl;
+            }
 
-          ++index;
-          // waitKey();
+            ++index;
+            // waitKey();
+          }
+        }
+        else if(possible_sign.shape == Shape::triangular)
+        {
+          // TO-DO
+        }
+        else
+        {
+
         }
       }
+      else if(possible_sign.color == Color::blue)
+      {
+        if(possible_sign.shape == Shape::circular)
+        {
+          unsigned index=0;
+          for(const auto& circular_template:instance.get_v_templates_blue())
+          {
+            // std::cout<<"Template # "<<index+1<<"/"<<instance.get_v_templates_blue().size()<<std::endl;
+            Mat result;
+            waitKey();
+            if(cv_lib::template_matching(data.Pic_HSV_blue, possible_sign.roi, circular_template, 0.80)==true)
+            {
+              int pos= instance.get_v_picNames_blue()[index].find("_template");
+              std::string name(instance.get_v_picNames_blue()[index], 0, pos);
+              possible_sign.name= name;
+              // std::cout<<"This is a "<<name<<std::endl<<std::endl<<std::endl;
+              // instance.print_info(possible_sign);
+              break;
+            }
+            else
+            {
+              int pos= instance.get_v_picNames_blue()[index].find("_template");
+              std::string name(instance.get_v_picNames_blue()[index], 0, pos);
+              possible_sign.name= name;
+              // std::cout<<"This is NOT a "<<name<<std::endl;
+            }
+
+            ++index;
+            // waitKey();
+          }
+
+        }
+        else if(possible_sign.shape == Shape::rectangular)
+        {
+          // TO-DO
+        }
+        else
+        {
+
+        }
+      }
+      else
+      {
+        std::cout<<"Unclasified colorr"<<std::endl;
+      }
+      instance.print_info(possible_sign);
       waitKey();
       destroyAllWindows();
 
@@ -91,20 +163,11 @@ int main(int argc, char* argv[])
     // morpho_pic(data.Pic_HSV_red, data.Pic_HSV_red, 3, MORPH_OPEN);
     //  show_pic(data.Pic_HSV_red, "closed");
 
-    create_contours(data.Pic_HSV_blue, data.v_blue_contours);
-    instance.extract_blue_HSV(data);
-    instance.filter_blue_contours(data);
-    show_pic(data.Pic_HSV_blue, "Blue");
-    waitKey();
+
     continue;
 
-    Mat result;
-
-    // return 0;
-
-
-  waitKey();
-}
+    waitKey();
+  }
 
   waitKey();
 

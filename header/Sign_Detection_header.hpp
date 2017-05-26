@@ -18,7 +18,7 @@ const int MIN_SATURATION  (150);
 
 
 const int RED_RNG   (15);
-const int BLUE_RNG  (15);
+const int BLUE_RNG  (20);
 
 const cv::Scalar RED_HSV_UPPER_LOW  (MAX_HUE-RED_RNG,       MIN_VALUE,  MIN_SATURATION);
 const cv::Scalar RED_HSV_UPPER_HIGH (MAX_HUE,               MAX_VALUE,  MAX_SATURATION);
