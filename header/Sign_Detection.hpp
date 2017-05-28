@@ -76,8 +76,7 @@ class Sign_Detection
 public:
   Sign_Detection();
   Sign_Detection(const std::string relative_samples_path, const std::string relative_templates_path);
-  // Sign_Detection(const int& argc, char* argv[]);  // Deprecated
-  ~Sign_Detection();
+  ~Sign_Detection() {};
 
   // int load_templates(const int& argc, char* argv[]);
   int load_templates();

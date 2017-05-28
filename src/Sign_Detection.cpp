@@ -42,44 +42,6 @@ Sign_Detection::Sign_Detection(const std::string relative_samples_path, const st
   }
 }
 
-Sign_Detection::~Sign_Detection()
-{
-
-}
-
-// int Sign_Detection::load_templates(const int& argc, char* argv[]) {   // Deprecated: loads only red ones using Filedata.txt
-//
-//     static int n_pic=0;
-//
-//     for(int i=1; i<argc; ++i)
-//     {
-//       ++n_pic;
-//
-//       if(argc < n_pic+1) {
-//         std::cout<<"Missing picture name"<<std::endl;
-//         return -1;
-//       }
-//
-//       Mat pic= imread( argv[n_pic], CV_LOAD_IMAGE_UNCHANGED);
-//
-//       if( pic.empty())  {
-//         std::cout<<"Error opening picture file "<<argv[n_pic]<<std::endl;
-//         return -1;
-//       }
-//       else
-//         v_templates_red.push_back(pic);
-//
-//       char chpicName[CHL];
-//       strcpy(chpicName, argv[n_pic]);
-//       std::string picName(chpicName);
-//
-//       int n= picName.find("templates/");
-//       picName.erase(picName.begin(), picName.begin() + n + 10);
-//       v_picNames_red.push_back(picName);
-//     }
-//     return 0;
-//   }
-
 int Sign_Detection::load_templates() {
   int return_value= 0;
 
@@ -351,18 +313,18 @@ void Sign_Detection::print_info(Sign sign)  {
     forma= "Rectangular";
     break;
   case 3:
-    forma="Triangular";
+    forma= "Triangular";
     break;
   default:
-    forma="Desconocida";
+    forma= "Unknown";
   }
 
   std::string color= as_integer(sign.color)==1
-  ? "Rojo"
-  : "Azul";
+  ? "Red"
+  : "Blue";
 
-  std::cout<<"Nombre: "<< sign.name<<std::endl;
-  std::cout<<"Forma: "<<  forma<<std::endl;
-  std::cout<<"Color: "<<  color<<std::endl;
+  std::cout<<"Name:\t"<< sign.name<<std::endl;
+  std::cout<<"Shape:\t"<<  forma<<std::endl;
+  std::cout<<"Color:\t"<<  color<<std::endl;
   std::cout<<std::endl<<std::endl;
 }

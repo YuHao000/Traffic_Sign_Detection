@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
           {
             // std::cout<<"Template # "<<index+1<<"/"<<instance.v_templates_red.size()<<std::endl;
             Mat result;
-            if(cv_lib::template_matching(data.Pic_HSV_red, possible_sign.roi, circular_template, 0.75)==true)
+            if(cv_lib::template_matching(data.Pic_HSV_red, possible_sign.roi, circular_template, 0.77)==true)
             {
               int pos= instance.get_v_picNames_red()[index].find("_template");
               std::string name(instance.get_v_picNames_red()[index], 0, pos);
@@ -159,6 +159,8 @@ int main(int argc, char* argv[])
       instance.print_info(possible_sign);
 
       waitKey();
+      
+      destroyWindow("Traffic sign");
     }
     // destroyAllWindows();
   }
