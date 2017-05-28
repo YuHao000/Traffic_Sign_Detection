@@ -13,9 +13,9 @@
 #ifndef Sign_Detection_HPP_INCLUDED
 #define Sign_Detection_HPP_INCLUDED
 
-#include "../../Academic_ComputerVision/code/header/cv_headers.hpp"
-#include "../../Academic_ComputerVision/code/header/cv_basic_operations.hpp"
-#include "../../Academic_ComputerVision/code/header/cv_library.hpp"
+#include "cv_headers.hpp"
+#include "cv_basic_operations.hpp"
+#include "cv_library.hpp"
 
 #include "Sign_Detection_header.hpp"
 

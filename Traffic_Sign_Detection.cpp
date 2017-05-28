@@ -12,8 +12,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "../Academic_ComputerVision/code/header/cv_basic_operations.hpp"
-#include "../Academic_ComputerVision/code/header/cv_library.hpp"
+#include "header/cv_basic_operations.hpp"
+#include "header/cv_library.hpp"
 #include "header/Sign_Detection.hpp"
 #include <vector>
 #include <string>
